@@ -10,7 +10,6 @@ import android.os.SystemClock;
 
 import processing.core.PApplet;
 
-
 public class AudioSerialSingleTrack {
 
 	private static Thread audiothread = null;
@@ -188,7 +187,7 @@ public class AudioSerialSingleTrack {
 
 	// essentially a constructor, but i prefer to do a manual call.
 	public static void activate(PApplet parent) {
-		//setup(parent);	// Complete control of the audio streams
+		setup(parent);	// Complete control of the audio streams
 		UpdateParameters(true);
 		
 		// Use a new tread as this can take a while
@@ -224,10 +223,10 @@ public class AudioSerialSingleTrack {
 	 * E/AndroidRuntime(16288): at
 	 * android.media.AudioTrack.stop(AudioTrack.java:845) 12-26 20:17:39.421:
 	 * E/AndroidRuntime(16288): at
-	 * com.andyrobo.test.audioserial.AudioSerialSingleTrack
+	 * com.andyrobo.ui.test.audioserial.AudioSerialSingleTrack
 	 * .deactivate(AudioSerialSingleTrack.java:203) 12-26 20:17:39.421:
 	 * E/AndroidRuntime(16288): at
-	 * com.andyrobo.test.audioserial.MainActivity$1.run(MainActivity.java:99)
+	 * com.andyrobo.ui.test.audioserial.MainActivity$1.run(MainActivity.java:99)
 	 */
 	public static void deactivate(PApplet parent) {
 		if (audiotrk != null) {

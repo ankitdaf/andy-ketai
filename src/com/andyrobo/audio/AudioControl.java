@@ -4,13 +4,11 @@ import processing.core.PApplet;
 import android.content.Context;
 import android.media.AudioManager;
 import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class AudioControl {
 	
 	private static AudioManager audioManager;
-	private static TelephonyManager telephonyManager;
 	
 	private static final String TAG = "AndyAudioControl";
 	
@@ -34,7 +32,6 @@ public class AudioControl {
 	
 // Yet to verify whether call state is actually being modified 
 	public void setCallsOff(PApplet parent) {
-		//telephonyManager = (TelephonyManager) parent.getApplicationContext().getSystemService(Context.)
 		ServiceState serviceState = new ServiceState();
 		serviceState.setStateOff();
 		Log.i(TAG, "Setting calls off");
