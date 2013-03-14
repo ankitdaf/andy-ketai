@@ -110,9 +110,9 @@ public class KetaiImageButton extends ImageButton {
 	 */
 	private void findParentIntentions() {
 		try {
-			buttonMethod = parent.getClass().getMethod(name+"Pressed",null);
+			buttonMethod = parent.getClass().getMethod(name+"Clicked",null);
 		} catch (Exception e) {
-			PApplet.println("The "+name+"Pressed method has not been implemented.Nothing to do here");
+			PApplet.println("The "+name+"Clicked method has not been implemented.Nothing to do here");
 		}
 	}
 	

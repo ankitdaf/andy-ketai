@@ -1,14 +1,16 @@
 package com.andyrobo.ui;
 
-import java.awt.Color;
 import java.lang.reflect.Method;
 
 import processing.core.PApplet;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.TextView;
 
 /**
  * 
@@ -22,12 +24,20 @@ import android.widget.RelativeLayout.LayoutParams;
  * 
  * 		void setPosition(float x, float y) - x,y location for the button<br />
  * 		void setVisibility(boolean isVisible) - button visible or invisible<br />
- * 		void setLabel(String _label) - label of the button <br />
+ * 		void setText(String _text) - text of the button <br />
+ * 		void setHint(String _hint) - hint to be shown <br />
+ * 		void updateText(String title, String message) - title,message of the dialogue box for text input<br />
  * 
  * @author ankitdaf
  *
  */
-public class KetaiButton extends Button {
+public class KetaiText extends TextView{
+	
+	// TODO :
+	// This is very generic and the implementation right now takes care of both
+	// TextView and EditText (the second one rather crudely)
+	// Find a different way to implement this ? 
+	// Extending EditText did not work for me
 
 	/** The parent. */
 	private PApplet parent;
@@ -36,7 +46,10 @@ public class KetaiButton extends Button {
 	String name = "KetaiButton";
 	
 	/** The button text */
-	String label = "";
+	String text = "";
+	
+	/** Textbox hint */
+	String hint = "";
 	
 	/** The layout. */
 	RelativeLayout layout;
@@ -57,27 +70,27 @@ public class KetaiButton extends Button {
 	 * 
 	 * @param _parent the PApplet
 	 * @param _name the button reference
-	 * @param _label the button text
+	 * @param _text the button text
 	 * @param _width button width
 	 * @param _height button height
 	 */
-	public KetaiButton(PApplet _parent, final String _name,final String _label, int _width, int _height) {
-		super(_parent.getApplicationContext());
+	public KetaiText(final PApplet _parent, final String _name,final String _text, int _width, int _height) {
+		super(_parent);
 		resize = true;
 		width = _width;
 		height = _height;
-		setupButton(_parent, _name, _label);
+		setupButton(_parent, _name, _text);
 	}
 
 	/**
 	 * 
 	 * @param _parent the PApplet
 	 * @param _name the button reference
-	 * @param _label the button text
-	 */
-	public KetaiButton(PApplet _parent, final String _name,final String _label) {
+	 * @param _text the button text
+	 */	
+	public KetaiText(PApplet _parent, final String _name,final String _text) {
 		super(_parent.getApplicationContext());
-		setupButton(_parent, _name, _label);
+		setupButton(_parent, _name, _text);
 	}
 
 	/**
@@ -86,14 +99,14 @@ public class KetaiButton extends Button {
 	 * 
 	 * @param _parent the PApplet
 	 * @param _name the name reference
-	 * @param _label the button text
+	 * @param _text the button text
 	 */
-	private void setupButton(PApplet _parent, final String _name,final String _label) {
+	private void setupButton(PApplet _parent, final String _name,final String _text) {
 		parent = _parent;
 		name = _name;
-		label = _label;
-		findParentIntentions();
+		text = _text;
 		init();
+		findParentIntentions();
 		this.setOnClickListener(new OnClickListener() {
 			
 			public void onClick(View arg0) {
@@ -105,6 +118,7 @@ public class KetaiButton extends Button {
 					}
 				}}
 			});
+		this.setText(text);
 	}
 	
 	/**
@@ -114,7 +128,8 @@ public class KetaiButton extends Button {
 		try {
 			buttonMethod = parent.getClass().getMethod(name+"Clicked",null);
 		} catch (Exception e) {
-			PApplet.println("The "+name+"Clicked method has not been implemented.Nothing to do here");
+			PApplet.println("The "+name+"Click method has not been implemented.Nothing to do here");
+			
 		}
 	}
 	
@@ -125,21 +140,23 @@ public class KetaiButton extends Button {
 		layout = new RelativeLayout(parent);
 		RelativeLayout.LayoutParams btnparams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		btnparams.setMargins(2,2,2,2);
+		//this.setHint(text);
 		if(resize){
 			btnparams.height = height;
 			btnparams.width = width;
 		}
+		this.setLayoutParams(btnparams);
 		layout.addView(this,btnparams);
+
 		parent.runOnUiThread(new Runnable() {
 			
 			public void run() {
 				parent.addContentView(layout, new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-				setText(label);
+				setTextColor(Color.BLACK);
 			}
-		});		
-
+		});
 	}
-
+	
 	/** 
 	 * 
 	 * Set the (x,y) co-ordinates for the button
@@ -159,17 +176,60 @@ public class KetaiButton extends Button {
 	 * @param isVisible true if visible, false otherwise
 	 */
 	public void setVisibility(boolean isVisible) {
-		if (isVisible) this.setVisibility(VISIBLE);
-		else this.setVisibility(INVISIBLE);
+		if (isVisible) super.setVisibility(VISIBLE);
+		else super.setVisibility(INVISIBLE);
 	}
 
 	/**
 	 * 
 	 * Set the button text
-	 * @param _label the button text
+	 * @param _text the button text
 	 */
-	public void setLabel(String _label) {
-		label = _label;
-		this.setText(label);
+	public void setText(String _text) {
+		super.setText(_text);
+		text = _text;
+	}
+	
+	/**
+	 * 
+	 * Sets the hint to show for input
+	 * @param _hint hint to show
+	 */
+	public void setHint(String _hint) {
+		super.setHint(_hint);
+		hint = _hint;
+	}
+
+	/**
+	 * 
+	 * @param title Title for the dialogue box
+	 * @param message Message for the dialogue box
+	 */
+	public void updateText(String title,String message) {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(parent);
+
+		alert.setTitle(title);
+		alert.setMessage(message);
+
+		// Set an EditText view to get user input 
+		final EditText input = new EditText(parent);
+		alert.setView(input);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+		  String value = input.getText().toString();
+		  setText(value);
+		  }
+		});
+
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		  public void onClick(DialogInterface dialog, int whichButton) {
+		    // Canceled.
+		  }
+		});
+
+		alert.show();
 }
+	
 }
