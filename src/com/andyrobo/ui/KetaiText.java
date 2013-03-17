@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 /**
  * 
- * Creates an Android Button
+ * Creates an Android text box, can be used as a label or editable text field. All methods below are in addition to the native Android methods
  * 
  * To process the buttonClick a sketch can define the following methods :<br /><br />
  * 
@@ -225,7 +225,6 @@ public class KetaiText extends TextView{
 
 		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 		  public void onClick(DialogInterface dialog, int whichButton) {
-		    // Canceled.
 		  }
 		});
 

@@ -12,7 +12,7 @@ import android.widget.RelativeLayout.LayoutParams;
 
 /**
  * 
- * Creates an Android ImageButton
+ * Creates an Android ImageButton. All methods below are in addition to the native Android methods
  * 
  * To process the buttonClick a sketch can define the following methods :<br /><br />
  * 

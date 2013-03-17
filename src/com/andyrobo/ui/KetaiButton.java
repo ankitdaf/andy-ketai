@@ -1,18 +1,16 @@
 package com.andyrobo.ui;
 
-import java.awt.Color;
 import java.lang.reflect.Method;
 
 import processing.core.PApplet;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
 /**
  * 
- * Creates an Android Button
+ * Creates an Android Button. All methods below are in addition to the native Android methods
  * 
  * To process the buttonClick a sketch can define the following methods :<br /><br />
  * 
