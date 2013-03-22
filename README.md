@@ -7,6 +7,12 @@ This includes extensions to the ketai library ( no modifications, fully compatib
 
 The code base for this repository is up to date with ketai_v9.
 
+The extensions to the existing Ketai Library include :
+
+- Quick and easy Button,ImageButton and editable text with appropriate callbacks
+- Support for onFlick and onFling gesture methods
+- Wifi data exchange over sockets
+
 Links
 -----
 
