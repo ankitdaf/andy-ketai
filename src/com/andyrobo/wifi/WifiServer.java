@@ -19,8 +19,9 @@ import ketai.net.KetaiNet;
  * 
  * The following methods can be implemented in a sketch to access data: <br /><br />
  * 
- * void onWifiDataReceived(Object obj) - the data object received, needs to be type cast appropriately<br />
+ * void onWifiDataReceived(WifiServer wf) - the connection on which the data was received, call wf.getDataObject() to get the data object<br />
  * void sendData(Object obj) - the data object to be sent to connected client<br />
+ * void getDataObject()<br />
  * 
  * @author ankitdaf
  *
@@ -28,10 +29,10 @@ import ketai.net.KetaiNet;
 public class WifiServer {
 
 	/** Network socket variables. */
-    private static String IP = "0.0.0.0";
-	public static int PORT = 9090 ;
+    private String IP = "0.0.0.0";
+    private int PORT = 9090 ;
     private ServerSocket serverSocket;
-    private static Thread serverThread = null;
+    private Thread serverThread = null;
     private Socket client;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
@@ -39,8 +40,8 @@ public class WifiServer {
 
     /**  Sketch specific variables. */
     private static PApplet parent;
-    private static boolean shouldStop=false;
-    private static Object dataObject;
+    private boolean shouldStop=false;
+    private Object dataObject;
     private Method onWifiDataReceivedMethod;
 
     /**
@@ -177,7 +178,7 @@ public class WifiServer {
 		dataObject = obj;
 		try {
 			if(onWifiDataReceivedMethod != null)
-			onWifiDataReceivedMethod.invoke(parent, new Object[] { dataObject});
+				onWifiDataReceivedMethod.invoke(parent, new Object[] {this});
 		} catch (Exception e) {
 		}
 	}
@@ -188,7 +189,7 @@ public class WifiServer {
 	 * 
 	 * @return The string identifying the IP address
 	 */
-	public static String getIP() {
+	public String getIP() {
 		return IP;
 	}
 	
@@ -196,11 +197,32 @@ public class WifiServer {
 	 * 
 	 * Set the ip address string identifying self. 
 	 * Any functionality other than setting the variable not guaranteed
+	 * Should consider removing it, purpose is unclear
 	 *  
 	 * @param iP self ip address
 	 */
-	public static void setIP(String iP) {
+	public void setIP(String iP) {
 		IP = iP;
+	}
+	
+	/**
+	 * 
+	 * Returns the PORT number of current connection
+	 * 
+	 * @return PORT port number of current connection
+	 */
+	public int getPort() {
+		return PORT;
+	}
+	
+	/**
+	 * 
+	 * Returns the dataObject associated with this connection
+	 * 
+	 * @return dataObject received dataObject
+	 */
+	public Object getDataObject() {
+		return dataObject;
 	}
 	
 	/**
@@ -210,7 +232,7 @@ public class WifiServer {
 	 */
 	private void findParentIntentions(){
 		try {
-			onWifiDataReceivedMethod=parent.getClass().getMethod("onWifiDataReceived", new Class[] {Object.class});
+			onWifiDataReceivedMethod=parent.getClass().getMethod("onWifiDataReceived", new Class[] {WifiServer.class});
 		}
 		catch (NoSuchMethodException e) {
 			parent.println("onWifiDataReceived method not defined");
