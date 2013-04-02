@@ -55,7 +55,14 @@ public class AndyGesture extends KetaiGesture {
 			onFlingMethod = parent.getClass().getMethod("onFling",
 					new Class[] { float.class, float.class, float.class,
 					float.class,float.class,float.class});
-		} catch (Exception e) {
+		} catch (NoSuchMethodException e) {
+			try {
+				onFlickMethod = parent.getClass().getMethod(
+						"onFlick",
+						new Class[] { float.class, float.class, float.class,
+								float.class, float.class });
+			} catch (Exception fe) {
+			}
 		}
 	}
 	
