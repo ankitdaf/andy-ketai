@@ -165,7 +165,7 @@ public class AndyMotorController {
 		sendBytes[PADDING_BYTES + 3] = (byte)getByte(rs);
 		sendBytes[PADDING_BYTES + 4] = (byte) 108;
 
-		showBytes(sendBytes);
+		//showBytes(sendBytes);
 
 		if (isNewStream(sendBytes)) {
 			this.send = true;
