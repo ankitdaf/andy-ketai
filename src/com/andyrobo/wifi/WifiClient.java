@@ -41,6 +41,7 @@ public class WifiClient{
 	/**  Sketch specific parameters  **/
 	private Method onWifiDataReceivedMethod;
 	private static PApplet parent;
+	private boolean close=false;
 
 	/**
 	 * 
@@ -94,7 +95,6 @@ public class WifiClient{
 	}
 	public void sendData(Object data) {
 		new wifiSender().execute(data);
-
 	}
 
 	/**
@@ -104,23 +104,13 @@ public class WifiClient{
 	 * @author ankitdaf
 	 *
 	 */
-	private class wifiListener implements Runnable {
+	private class wifiListener extends Thread {
 
+		@Override
 		public void run() {
-			while(true){
-			try{
-				dataObject=ois.readObject();
-				handleWirelessData(dataObject);
-			} catch (OptionalDataException e) {
-				e.printStackTrace();
-				break;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				break;
-			} catch (IOException e) {
-				e.printStackTrace();
-				break;
-			}
+			System.out.println("ankit");
+			while(!close){
+				handleWirelessData();
 		}
 		}
 		
@@ -137,9 +127,11 @@ public class WifiClient{
 	private class wifiConnector extends AsyncTask {
 	
 		@Override
-		protected Object doInBackground(Object... arg0) {
+		protected Object doInBackground(Object... arg0) {  
 		try {
 			socket = new Socket(connectTo, PORT);
+			socket.setKeepAlive(true);
+			close=false;
 			System.out.println("Connected to "+connectTo+" on PORT "+PORT);
 
 			/**
@@ -150,8 +142,7 @@ public class WifiClient{
 			oos = new ObjectOutputStream(socket.getOutputStream());
 			oos.flush();
 			ois = new ObjectInputStream(socket.getInputStream());
-			new wifiListener().run();
-			return true;
+			new wifiListener().start();
 		}
 		 catch (UnknownHostException e) {
 			System.out.println("Invalid IP Address");
@@ -160,7 +151,7 @@ public class WifiClient{
 			System.out.println("Cannot connect");
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 	}
 	
@@ -170,14 +161,26 @@ public class WifiClient{
 	 * 
 	 * @param obj The data object received, typecast it correctly before use 
 	 */
-	private void handleWirelessData(Object obj)
+	private void handleWirelessData()
 	{
 		try {
+			dataObject=ois.readObject();
 			if(onWifiDataReceivedMethod != null)
 				onWifiDataReceivedMethod.invoke(parent, new Object[] {this});
-		} catch (Exception e) {
+		}  catch (OptionalDataException e) {
+			e.printStackTrace();
+			close=true;
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			close=true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			close=true;
+		} 
+		catch (Exception e) {
 			System.out.println("Could not process incoming data");
 			e.printStackTrace();
+			close=true;
 		}
 	}
 	

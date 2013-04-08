@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -39,7 +40,7 @@ public class WifiServer {
     private Socket client;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
-    boolean isStreamInitialized=false;
+    private boolean close=false;
 
     /**  Sketch specific variables. */
     private static PApplet parent;
@@ -93,15 +94,15 @@ public class WifiServer {
                         // listen for incoming clients
                     	System.out.println("Waiting at IP "+IP );
                         client = serverSocket.accept();
+                        close=false;
                         System.out.println("Accepted from" + client.getInetAddress());
                         try {
-                        	if(!isStreamInitialized){
                         		oos = new ObjectOutputStream(client.getOutputStream());
                         		oos.flush();
                         		ois = new ObjectInputStream(client.getInputStream());
-                            isStreamInitialized=true;
-                        	}
-                        	handleWirelessData(ois.readObject());
+                        		while(!close) {
+                        			handleWirelessData();
+                        		}
                         }
                         catch (EOFException e) {
                         	System.out.println("End of File encountered");
@@ -112,7 +113,6 @@ public class WifiServer {
                         	e.printStackTrace();
                         	break;
                         }
-                        if(client.isClosed()) isStreamInitialized=false;
                         }
                 } else {
                 	System.out.println("No Wifi");
@@ -166,7 +166,6 @@ public class WifiServer {
 					}
 					else {
 						System.out.println("Client unavailable");
-						isStreamInitialized=false;
 					}
 					
 				} catch (IOException e) {
@@ -184,13 +183,24 @@ public class WifiServer {
 	 * 
 	 * @param obj The data object received, typecast it correctly before use 
 	 */
-	private void handleWirelessData(Object obj)
+	private void handleWirelessData()
 	{
-		dataObject = obj;
 		try {
+			dataObject = ois.readObject();
 			if(onWifiDataReceivedMethod != null)
 				onWifiDataReceivedMethod.invoke(parent, new Object[] {this});
-		} catch (Exception e) {
+		} catch (OptionalDataException e1) {
+			e1.printStackTrace();
+			close=true;
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			close=true;
+		} catch (IOException e1) {
+			System.out.println("IO Error");
+			e1.printStackTrace();
+			close=true;
+		} catch (Exception e1) {
+			close=true;
 		}
 	}
 
