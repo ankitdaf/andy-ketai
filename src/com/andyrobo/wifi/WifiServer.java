@@ -1,5 +1,6 @@
 package com.andyrobo.wifi;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,9 +18,11 @@ import ketai.net.KetaiNet;
  * The Class WifiServer allows you to send/receive data over WiFi sockets
  * The implementation is generic, which means all data types and objects can be exchanged
  * 
- * The following methods can be implemented in a sketch to access data: <br /><br />
+ * The following methods can be implemented in a sketch : <br /><br />
  * 
- * void onWifiDataReceived(WifiServer wf) - the connection on which the data was received, call wf.getDataObject() to get the data object<br />
+ * void startListening()<br />
+ * void stopServer()<br />
+ * void onWifiDataReceived(WifiServer wf) - the WifiServer on which the data was received, call wf.getDataObject() to get the data object<br />
  * void sendData(Object obj) - the data object to be sent to connected client<br />
  * void getDataObject()<br />
  * 
@@ -54,7 +57,7 @@ public class WifiServer {
 	public WifiServer(final PApplet _parent,int port) {
 		PORT = port;
 		parent = _parent;
-		setIP(KetaiNet.getIP());
+		IP = KetaiNet.getIP();
 		findParentIntentions();
 		serverThread = new Thread(new ServerThread());
 	}
@@ -62,11 +65,12 @@ public class WifiServer {
 	/**
 	 * 
 	 * Instantiates a new Wifi Server connection
+	 * 
 	 * @param _parent the calling sketch/Activity
 	 */
 	public WifiServer(PApplet _parent) {
 		parent = _parent;
-		setIP(KetaiNet.getIP());
+		IP = KetaiNet.getIP();
 		findParentIntentions();
 		serverThread = new Thread(new ServerThread());	
 	}
@@ -84,30 +88,37 @@ public class WifiServer {
                 if (IP != null) {
                     serverSocket = new ServerSocket();
                     serverSocket.setReuseAddress(true);
-                    serverSocket.bind(new InetSocketAddress(PORT));
+                    serverSocket.bind(new InetSocketAddress(IP,PORT));
                     while (!shouldStop) {
                         // listen for incoming clients
-                    	parent.println("Waiting at IP "+IP );
+                    	System.out.println("Waiting at IP "+IP );
                         client = serverSocket.accept();
-                        parent.println("Accepted from" + client.getInetAddress());
+                        System.out.println("Accepted from" + client.getInetAddress());
                         try {
                         	if(!isStreamInitialized){
-                        	ois = new ObjectInputStream(client.getInputStream());
-                        	oos = new ObjectOutputStream(client.getOutputStream());
+                        		oos = new ObjectOutputStream(client.getOutputStream());
+                        		oos.flush();
+                        		ois = new ObjectInputStream(client.getInputStream());
                             isStreamInitialized=true;
                         	}
                         	handleWirelessData(ois.readObject());
                         }
+                        catch (EOFException e) {
+                        	System.out.println("End of File encountered");
+                        	e.printStackTrace();
+                        	break;
+                        }
                         catch (Exception e) {
                         	e.printStackTrace();
+                        	break;
                         }
                         if(client.isClosed()) isStreamInitialized=false;
                         }
                 } else {
-                	parent.println("No Wifi");
+                	System.out.println("No Wifi");
                 }
             } catch (Exception e) {
-            	parent.println("Wifi error");
+            	System.out.println("Wifi error");
                 e.printStackTrace();
             }
         }
@@ -131,10 +142,10 @@ public class WifiServer {
 		try {
 			shouldStop=true;
 			serverSocket.close();
-			parent.println("Stopped server");
+			System.out.println("Stopped server");
 		}
 		catch (IOException e) {
-			parent.println("Error closing socket");
+			System.out.println("Error closing socket");
 			e.printStackTrace();
 		}	
 	}
@@ -154,12 +165,12 @@ public class WifiServer {
 					oos.writeObject(obj);
 					}
 					else {
-						parent.println("Client unavailable");
+						System.out.println("Client unavailable");
 						isStreamInitialized=false;
 					}
 					
 				} catch (IOException e) {
-					parent.println("Could not send data");
+					System.out.println("Could not send data");
 					e.printStackTrace();
 				}
 
@@ -173,7 +184,7 @@ public class WifiServer {
 	 * 
 	 * @param obj The data object received, typecast it correctly before use 
 	 */
-	public void handleWirelessData(Object obj)
+	private void handleWirelessData(Object obj)
 	{
 		dataObject = obj;
 		try {
@@ -191,18 +202,6 @@ public class WifiServer {
 	 */
 	public String getIP() {
 		return IP;
-	}
-	
-	/**
-	 * 
-	 * Set the ip address string identifying self. 
-	 * Any functionality other than setting the variable not guaranteed
-	 * Should consider removing it, purpose is unclear
-	 *  
-	 * @param iP self ip address
-	 */
-	public void setIP(String iP) {
-		IP = iP;
 	}
 	
 	/**
@@ -235,7 +234,7 @@ public class WifiServer {
 			onWifiDataReceivedMethod=parent.getClass().getMethod("onWifiDataReceived", new Class[] {WifiServer.class});
 		}
 		catch (NoSuchMethodException e) {
-			parent.println("onWifiDataReceived method not defined");
+			System.out.println("onWifiDataReceived method not defined");
 		}
 	}
 	
