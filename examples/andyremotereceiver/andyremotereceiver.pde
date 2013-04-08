@@ -52,6 +52,7 @@ void setup() {
   bt.makeDiscoverable();
   c = new AndyMotorController(this);
   c.begin();
+  keepScreenOn();
 }
 
 void draw() {

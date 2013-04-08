@@ -10,3 +10,14 @@ void showFace(String whichFace) {
   image(img,0,0,width,height);
 }
 
+void keepScreenOn()
+{
+  runOnUiThread(new Runnable() {
+      
+      @Override
+      public void run() {
+        getWindow().getDecorView().getRootView().setKeepScreenOn(true);
+      }
+    });
+}
+
