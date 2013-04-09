@@ -264,7 +264,7 @@ public class AudioSerialSingleTrack {
 		if (audiotrk != null && isAudioTrackInitialized()) {
 			if (generatedSnd != null) {
 				while (audiotrk.getPlaybackHeadPosition() < (generatedSnd.length))
-					SystemClock.sleep(50); // let existing sample finish first:
+					SystemClock.sleep(20); // let existing sample finish first:
 											// this can probably be set to a
 											// smarter number using the
 											// information above
