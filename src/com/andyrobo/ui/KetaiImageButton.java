@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import processing.core.PApplet;
 import processing.core.PImage;
 import android.graphics.Bitmap;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -14,9 +16,10 @@ import android.widget.RelativeLayout.LayoutParams;
  * 
  * Creates an Android ImageButton. All methods below are in addition to the native Android methods
  * 
- * To process the buttonClick a sketch can define the following methods :<br /><br />
+ * To process the button interactions a sketch can define the following methods :<br /><br />
  * 
  * 		void namePressed()  - "name" is the name of the button supplied in the constructor<br />
+ * 		void nameonTouch() - "name is the name of the button supplied in the constructor<br />
  * 
  * To modify the button properties a sketch can call the following methods :<br /><br />
  * 
@@ -50,8 +53,8 @@ public class KetaiImageButton extends ImageButton {
 	/** Manual Resize. */
 	boolean resize=false;
 	
-	/** The implemented onClick method for the button	 */
-	Method buttonMethod;
+	/** The implemented onClick and onTouch method for the button	 */
+	Method buttonMethod,buttonOnTouchMethod;
 
 	/**
 	 * Instantiates a new ketai button.
@@ -103,6 +106,22 @@ public class KetaiImageButton extends ImageButton {
 				}
 			}}
 		});
+		
+		this.setOnTouchListener(new OnTouchListener() {
+			
+			public boolean onTouch(View arg0, MotionEvent arg1) {
+				if (buttonOnTouchMethod != null) {
+					try {
+						buttonOnTouchMethod.invoke(parent, new Object[] {arg1});
+						return true;	
+					} catch (Exception e) {
+						e.printStackTrace();
+						return false;
+					}
+			}
+				else return false;
+			}
+		});
 	}
 	
 	/**
@@ -113,6 +132,10 @@ public class KetaiImageButton extends ImageButton {
 			buttonMethod = parent.getClass().getMethod(name+"Clicked",null);
 		} catch (Exception e) {
 			PApplet.println("The "+name+"Clicked method has not been implemented.Nothing to do here");
+		}
+		try {
+			buttonOnTouchMethod = parent.getClass().getMethod(name+"onTouch", new Class[] {MotionEvent.class});
+		} catch (NoSuchMethodException e) {
 		}
 	}
 	

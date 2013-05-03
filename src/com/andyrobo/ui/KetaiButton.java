@@ -3,6 +3,7 @@ package com.andyrobo.ui;
 import java.lang.reflect.Method;
 
 import processing.core.PApplet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -12,9 +13,10 @@ import android.widget.RelativeLayout.LayoutParams;
  * 
  * Creates an Android Button. All methods below are in addition to the native Android methods
  * 
- * To process the buttonClick a sketch can define the following methods :<br /><br />
+ * To process the button interactions a sketch can define the following methods :<br /><br />
  * 
  * 		void namePressed()  - "name" is the name of the button supplied in the constructor<br />
+ * 		void nameonTouch() - "name is the name of the button supplied in the constructor<br />
  * 
  * To modify the button properties a sketch can call the following methods :<br /><br />
  * 
@@ -48,8 +50,8 @@ public class KetaiButton extends Button {
 	/** Manual Resize. */
 	boolean resize=false;
 	
-	/** The implemented onClick method for the button	 */
-	Method buttonMethod;
+	/** The implemented onClick and onTouch method for the button	 */
+	Method buttonMethod,buttonOnTouchMethod;
 
 	/**
 	 * 
@@ -103,6 +105,21 @@ public class KetaiButton extends Button {
 					}
 				}}
 			});
+		this.setOnTouchListener(new OnTouchListener() {
+			
+			public boolean onTouch(View arg0, MotionEvent arg1) {
+				if (buttonOnTouchMethod != null) {
+					try {
+						buttonOnTouchMethod.invoke(parent, new Object[] {arg1});
+						return true;	
+					} catch (Exception e) {
+						e.printStackTrace();
+						return false;
+					}
+			}
+				else return false;
+			}
+		});
 	}
 	
 	/**
@@ -113,6 +130,10 @@ public class KetaiButton extends Button {
 			buttonMethod = parent.getClass().getMethod(name+"Clicked",null);
 		} catch (Exception e) {
 			PApplet.println("The "+name+"Clicked method has not been implemented.Nothing to do here");
+		}
+		try {
+			buttonOnTouchMethod = parent.getClass().getMethod(name+"onTouch", new Class[] {MotionEvent.class});
+		} catch (NoSuchMethodException e) {
 		}
 	}
 	
